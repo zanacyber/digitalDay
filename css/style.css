@@ -1,0 +1,53 @@
+/* Styles supplémentaires */
+#generatedQrCode, #scannedQrCode {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.history-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.history-item {
+    background-color: white;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.history-item:hover {
+    transform: translateY(-2px);
+}
+
+.history-item h3 {
+    margin: 0 0 5px 0;
+    color: #1c1c1e;
+}
+
+.history-item p {
+    margin: 5px 0;
+    color: #636366;
+    font-size: 0.9em;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #8e8e93;
+}
+
+.empty-state i {
+    font-size: 3em;
+    margin-bottom: 15px;
+    color: #d1d1d6;
+}
+
+.empty-state p {
+    margin: 10px 0;
+}

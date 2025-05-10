@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Product Manager</title>
+    <link rel="stylesheet" href="css/ios.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+</head>
+<body>
+    <!-- Header iOS style -->
+    <header class="ios-header">
+        <h1>QR Product</h1>
+    </header>
+
+    <!-- Main Content -->
+    <main class="content" id="mainContent">
+        <section class="welcome-section">
+            <img src="images/logo.png" alt="Logo" class="app-logo">
+            <h2>Gestion des Produits</h2>
+            <p>Créez, scannez et gérez vos produits avec des codes QR</p>
+        </section>
+    </main>
+
+    <!-- Tab Bar iOS style -->
+    <nav class="ios-tab-bar">
+        <button class="tab-button active" id="addTab">
+            <i class="fas fa-plus"></i>
+            <span>Ajouter</span>
+        </button>
+        <button class="tab-button" id="scanTab">
+            <i class="fas fa-qrcode"></i>
+            <span>Scanner</span>
+        </button>
+        <button class="tab-button" id="historyTab">
+            <i class="fas fa-history"></i>
+            <span>Historique</span>
+        </button>
+    </nav>
+
+    <!-- Modals -->
+    <div class="modal" id="addModal">
+        <div class="modal-content ios-modal">
+            <div class="modal-header">
+                <h3>Nouveau Produit</h3>
+                <button class="close-button" id="closeAddModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="productForm">
+                    <div class="form-group">
+                        <label for="productName">Nom du Produit</label>
+                        <input type="text" id="productName" class="ios-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productReference">Référence</label>
+                        <input type="text" id="productReference" class="ios-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="producer">Producteur</label>
+                        <input type="text" id="producer" class="ios-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="expirationDate">Date d'Expiration</label>
+                        <input type="date" id="expirationDate" class="ios-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productSteps">Étapes à suivre</label>
+                        <textarea id="productSteps" class="ios-input" rows="4"></textarea>
+                    </div>
+                    <button type="submit" class="ios-button primary">Générer QR Code</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="qrModal">
+        <div class="modal-content ios-modal">
+            <div class="modal-header">
+                <h3>QR Code Généré</h3>
+                <button class="close-button" id="closeQrModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="generatedQrCode"></div>
+                <div class="product-info">
+                    <h4 id="qrProductName"></h4>
+                    <p id="qrProductDetails"></p>
+                </div>
+                <button class="ios-button secondary" id="saveQrButton">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="scanModal">
+        <div class="modal-content ios-modal">
+            <div class="modal-header">
+                <h3>Scanner QR Code</h3>
+                <button class="close-button" id="closeScanModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="scannerContainer">
+                    <video id="scanner" width="100%" playsinline></video>
+                    <div id="scannerOverlay"></div>
+                </div>
+                <p class="scan-instructions">Pointez votre caméra vers un code QR</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="productInfoModal">
+        <div class="modal-content ios-modal">
+            <div class="modal-header">
+                <h3 id="infoProductName"></h3>
+                <button class="close-button" id="closeProductInfoModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="info-section">
+                    <h4>Informations</h4>
+                    <p><strong>Référence:</strong> <span id="infoReference"></span></p>
+                    <p><strong>Producteur:</strong> <span id="infoProducer"></span></p>
+                    <p><strong>Date d'Expiration:</strong> <span id="infoExpiration"></span></p>
+                </div>
+                <div class="info-section">
+                    <h4>Étapes à suivre</h4>
+                    <p id="infoSteps"></p>
+                </div>
+                <div id="scannedQrCode" class="qr-display"></div>
+                <button class="ios-button secondary" id="closeInfoButton">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/qrcode.js"></script>
+    <script src="js/scanner.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
