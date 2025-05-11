@@ -45,13 +45,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function openModal(modal) {
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
+        document.body.classList.add('modal-open');
+        modal.classList.add('active');
     }
     
     function closeModal(modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
+        document.body.classList.remove('modal-open');
+        modal.classList.remove('active');
     }
     
     function formatDate(dateString) {
@@ -174,27 +174,24 @@ document.addEventListener('DOMContentLoaded', function() {
             correctLevel: QRCode.CorrectLevel.H
         });
         
-        // Stocker les données pour la sauvegarde
         qrCodeElement.dataset.qrData = qrData;
-        
         openModal(qrModal);
     }
     
     // Écouteurs d'événements
     addTab.addEventListener('click', function() {
         switchTab(this);
+        openModal(addModal);
     });
     
     scanTab.addEventListener('click', function() {
         switchTab(this);
+        openModal(scanModal);
+        startScanner();
     });
     
     historyTab.addEventListener('click', function() {
         switchTab(this);
-    });
-    
-    addTab.addEventListener('click', function() {
-        openModal(addModal);
     });
     
     closeAddModal.addEventListener('click', function() {
@@ -265,11 +262,6 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Erreur enregistrement:', e);
             alert('Erreur lors de l\'enregistrement');
         }
-    });
-    
-    scanTab.addEventListener('click', function() {
-        openModal(scanModal);
-        startScanner();
     });
     
     // Initialisation
