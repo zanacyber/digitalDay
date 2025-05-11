@@ -33,7 +33,7 @@ function startScanner() {
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
                 
-                // Démarrer l'analyse
+                // Démarrer l'analyse périodique
                 scannerInterval = setInterval(() => {
                     if (video.readyState >= video.HAVE_METADATA) {
                         canvas.width = video.videoWidth;
@@ -73,13 +73,6 @@ function processScannedData(data) {
     }
     
     closeModal(document.getElementById('scanModal'));
-}
-
-function showRawData(data, title = "Contenu du QR Code") {
-    const modal = document.getElementById('rawDataModal');
-    document.querySelector('#rawDataModal .modal-header h3').textContent = title;
-    document.getElementById('rawDataContent').textContent = data;
-    openModal(modal);
 }
 
 function handleCameraError(err) {
@@ -123,4 +116,3 @@ function stopScanner() {
 // Exposer les fonctions globales
 window.startScanner = startScanner;
 window.stopScanner = stopScanner;
-window.showRawData = showRawData;
