@@ -27,7 +27,20 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Données
     let products = JSON.parse(localStorage.getItem('products')) || [];
-    
+
+    // Fonctions partagées avec scanner.js
+    const sharedFunctions = {
+        showProductInfo,
+        showRawData,
+        closeModal,
+        openModal
+    };
+
+    // Initialiser le scanner
+    if (window.initScanner) {
+        initScanner(sharedFunctions);
+    }
+
     // Fonctions de base
     function switchTab(tab) {
         document.querySelectorAll('.tab-button').forEach(btn => {
