@@ -10,12 +10,10 @@
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 </head>
 <body>
-    <!-- Header iOS style -->
     <header class="ios-header">
         <h1>QR Product</h1>
     </header>
 
-    <!-- Main Content -->
     <main class="content" id="mainContent">
         <section class="welcome-section">
             <img src="images/logo.png" alt="Logo" class="app-logo">
@@ -24,7 +22,6 @@
         </section>
     </main>
 
-    <!-- Tab Bar iOS style -->
     <nav class="ios-tab-bar">
         <button class="tab-button active" id="addTab">
             <i class="fas fa-plus"></i>
@@ -101,30 +98,11 @@
             <div class="modal-body">
                 <div id="scannerContainer">
                     <video id="scanner" width="100%" playsinline></video>
-                    <div id="scannerOverlay"></div>
                 </div>
                 <p class="scan-instructions">Pointez votre caméra vers un code QR</p>
             </div>
         </div>
     </div>
-
-    <div class="modal" id="rawDataModal">
-    <div class="modal-content ios-modal">
-        <div class="modal-header">
-            <h3>Contenu du QR Code</h3>
-            <button class="close-button" id="closeRawDataModal">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="info-section">
-                <h4>Données brutes du QR Code</h4>
-                <div class="raw-data-container">
-                    <pre id="rawDataContent"></pre>
-                </div>
-            </div>
-            <button class="ios-button secondary" id="closeRawDataButton">Fermer</button>
-        </div>
-    </div>
-</div>
 
     <div class="modal" id="productInfoModal">
         <div class="modal-content ios-modal">
@@ -145,6 +123,24 @@
                 </div>
                 <div id="scannedQrCode" class="qr-display"></div>
                 <button class="ios-button secondary" id="closeInfoButton">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="rawDataModal">
+        <div class="modal-content ios-modal">
+            <div class="modal-header">
+                <h3>Contenu du QR Code</h3>
+                <button class="close-button" id="closeRawDataModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="info-section">
+                    <h4>Données brutes</h4>
+                    <div class="raw-data-container">
+                        <pre id="rawDataContent"></pre>
+                    </div>
+                </div>
+                <button class="ios-button secondary" id="closeRawDataButton">Fermer</button>
             </div>
         </div>
     </div>
