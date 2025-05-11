@@ -1,17 +1,23 @@
+// Scanner QR Code
 let scannerInterval = null;
 let videoStream = null;
+
+// Fonctions partagées (à appeler depuis app.js)
+let sharedFunctions = null;
+
+function initScanner(functions) {
+    sharedFunctions = functions;
+}
 
 function startScanner() {
     const video = document.getElementById('scanner');
     const scanModal = document.getElementById('scanModal');
     
-    // Vérifier la compatibilité
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         alert('Votre navigateur ne supporte pas l\'accès à la caméra');
         return;
     }
 
-    // Options caméra
     const constraints = {
         video: {
             facingMode: 'environment',
@@ -20,7 +26,6 @@ function startScanner() {
         }
     };
 
-    // Démarrer le flux vidéo
     navigator.mediaDevices.getUserMedia(constraints)
         .then(function(stream) {
             videoStream = stream;
@@ -29,11 +34,9 @@ function startScanner() {
             video.onloadedmetadata = function() {
                 video.play();
                 
-                // Créer un canvas pour l'analyse
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
                 
-                // Démarrer l'analyse périodique
                 scannerInterval = setInterval(() => {
                     if (video.readyState >= video.HAVE_METADATA) {
                         canvas.width = video.videoWidth;
@@ -59,26 +62,29 @@ function startScanner() {
 }
 
 function processScannedData(data) {
+    if (!sharedFunctions) {
+        console.error('Fonctions partagées non initialisées');
+        return;
+    }
+
     try {
         const productData = JSON.parse(data);
         
-        // Vérifier si c'est un produit valide
         if (productData.name || productData.reference) {
-            showProductInfo(productData);
+            sharedFunctions.showProductInfo(productData);
         } else {
-            showRawData(data, "QR Code détecté (format non reconnu)");
+            sharedFunctions.showRawData(data, "QR Code détecté (format non reconnu)");
         }
     } catch (e) {
-        showRawData(data, "QR Code détecté (données brutes)");
+        sharedFunctions.showRawData(data, "QR Code détecté (données brutes)");
     }
     
-    closeModal(document.getElementById('scanModal'));
+    sharedFunctions.closeModal(document.getElementById('scanModal'));
 }
 
 function handleCameraError(err) {
     console.error('Erreur caméra:', err);
     
-    // Fallback sans spécification de caméra
     if (err.name === 'OverconstrainedError') {
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(function(stream) {
@@ -96,7 +102,6 @@ function handleCameraError(err) {
 }
 
 function stopScanner() {
-    // Nettoyage des ressources
     if (scannerInterval) {
         clearInterval(scannerInterval);
         scannerInterval = null;
@@ -113,6 +118,7 @@ function stopScanner() {
     }
 }
 
-// Exposer les fonctions globales
+// Exposer les fonctions
 window.startScanner = startScanner;
 window.stopScanner = stopScanner;
+window.initScanner = initScanner;
