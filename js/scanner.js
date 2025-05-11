@@ -6,13 +6,11 @@ function startScanner() {
     const video = document.getElementById('scanner');
     const scanModal = document.getElementById('scanModal');
     
-    // Vérifier la compatibilité
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         alert('Votre navigateur ne supporte pas l\'accès à la caméra');
         return;
     }
 
-    // Options pour la caméra
     const constraints = {
         video: {
             facingMode: 'environment',
@@ -21,7 +19,6 @@ function startScanner() {
         }
     };
 
-    // Démarrer le flux vidéo
     navigator.mediaDevices.getUserMedia(constraints)
         .then(function(stream) {
             videoStream = stream;
@@ -30,11 +27,9 @@ function startScanner() {
             video.onloadedmetadata = function() {
                 video.play();
                 
-                // Créer un canvas pour l'analyse
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
                 
-                // Démarrer l'analyse périodique
                 scannerInterval = setInterval(() => {
                     if (video.readyState >= video.HAVE_METADATA) {
                         canvas.width = video.videoWidth;
@@ -43,8 +38,6 @@ function startScanner() {
                         try {
                             context.drawImage(video, 0, 0, canvas.width, canvas.height);
                             const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-                            
-                            // Détection QR avec jsQR
                             const code = jsQR(imageData.data, imageData.width, imageData.height, {
                                 inversionAttempts: 'dontInvert'
                             });
@@ -52,12 +45,33 @@ function startScanner() {
                             if (code) {
                                 stopScanner();
                                 try {
-                                    const productData = JSON.parse(code.data);
+                                    // Vérifier si c'est un JSON valide
+                                    let productData;
+                                    try {
+                                        productData = JSON.parse(code.data);
+                                    } catch (e) {
+                                        // Si ce n'est pas un JSON, créer un objet avec le texte brut
+                                        productData = {
+                                            rawData: code.data,
+                                            name: "QR Code Scanné",
+                                            reference: "N/A",
+                                            producer: "N/A",
+                                            expiration: "N/A",
+                                            steps: "Données brutes du QR Code"
+                                        };
+                                    }
+                                    
+                                    // Vérifier si c'est un produit valide (au moins un champ requis)
+                                    if (!productData.name && !productData.rawData) {
+                                        throw new Error("Format de QR Code non reconnu");
+                                    }
+                                    
                                     showProductInfo(productData);
                                     closeModal(scanModal);
                                 } catch (e) {
-                                    console.error('Erreur parsing QR:', e);
-                                    alert('QR Code invalide');
+                                    console.error('Erreur:', e);
+                                    alert('QR Code détecté mais format non supporté: ' + code.data);
+                                    startScanner(); // Redémarrer le scanner
                                 }
                             }
                         } catch (e) {
@@ -67,31 +81,30 @@ function startScanner() {
                 }, 300);
             };
         })
-        .catch(function(err) {
-            console.error('Erreur caméra:', err);
-            
-            // Fallback si la caméra arrière échoue
-            if (err.name === 'OverconstrainedError' || err.name === 'ConstraintNotSatisfiedError') {
-                const fallbackConstraints = {
-                    video: {
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    }
-                };
-                
-                navigator.mediaDevices.getUserMedia(fallbackConstraints)
-                    .then(function(stream) {
-                        videoStream = stream;
-                        video.srcObject = stream;
-                        video.play();
-                    })
-                    .catch(function(fallbackErr) {
-                        alert('Impossible d\'accéder à la caméra: ' + fallbackErr.message);
-                    });
-            } else {
-                alert('Erreur caméra: ' + err.message);
-            }
-        });
+        .catch(handleCameraError);
+}
+
+function handleCameraError(err) {
+    console.error('Erreur caméra:', err);
+    
+    if (err.name === 'OverconstrainedError' || err.name === 'ConstraintNotSatisfiedError') {
+        const fallbackConstraints = {
+            video: true // Mode plus permissif
+        };
+        
+        navigator.mediaDevices.getUserMedia(fallbackConstraints)
+            .then(function(stream) {
+                const video = document.getElementById('scanner');
+                videoStream = stream;
+                video.srcObject = stream;
+                video.play();
+            })
+            .catch(function(fallbackErr) {
+                alert('Impossible d\'accéder à la caméra: ' + fallbackErr.message);
+            });
+    } else {
+        alert('Erreur caméra: ' + err.message);
+    }
 }
 
 function stopScanner() {
@@ -111,6 +124,5 @@ function stopScanner() {
     }
 }
 
-// Exposer les fonctions globalement
 window.startScanner = startScanner;
 window.stopScanner = stopScanner;
