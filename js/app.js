@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Elements
+    // Éléments DOM
     const addTab = document.getElementById('addTab');
     const scanTab = document.getElementById('scanTab');
     const historyTab = document.getElementById('historyTab');
@@ -10,38 +10,57 @@ document.addEventListener('DOMContentLoaded', function() {
     const qrModal = document.getElementById('qrModal');
     const scanModal = document.getElementById('scanModal');
     const productInfoModal = document.getElementById('productInfoModal');
+    const rawDataModal = document.getElementById('rawDataModal');
     
-    // Buttons
+    // Boutons
     const closeAddModal = document.getElementById('closeAddModal');
     const closeQrModal = document.getElementById('closeQrModal');
     const closeScanModal = document.getElementById('closeScanModal');
     const closeProductInfoModal = document.getElementById('closeProductInfoModal');
+    const closeRawDataModal = document.getElementById('closeRawDataModal');
     const closeInfoButton = document.getElementById('closeInfoButton');
+    const closeRawDataButton = document.getElementById('closeRawDataButton');
     const saveQrButton = document.getElementById('saveQrButton');
     
-    // Forms
+    // Formulaires
     const productForm = document.getElementById('productForm');
     
-    // Product data
+    // Données
     let products = JSON.parse(localStorage.getItem('products')) || [];
     
-    // Tab switching
+    // Fonctions de base
     function switchTab(tab) {
         document.querySelectorAll('.tab-button').forEach(btn => {
             btn.classList.remove('active');
         });
-        
         tab.classList.add('active');
         
         if (tab === addTab) {
             showWelcomeContent();
         } else if (tab === scanTab) {
-            showScanner();
+            showScannerContent();
         } else if (tab === historyTab) {
             showHistory();
         }
     }
     
+    function openModal(modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeModal(modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+    
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('fr-FR');
+    }
+    
+    // Affichage des contenus
     function showWelcomeContent() {
         mainContent.innerHTML = `
             <section class="welcome-section">
@@ -52,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
     }
     
-    function showScanner() {
+    function showScannerContent() {
         mainContent.innerHTML = `
             <section class="welcome-section">
                 <i class="fas fa-qrcode" style="font-size: 3em; color: #007aff; margin-bottom: 20px;"></i>
@@ -77,8 +96,8 @@ document.addEventListener('DOMContentLoaded', function() {
             products.forEach((product, index) => {
                 historyHTML += `
                     <div class="history-item" data-index="${index}">
-                        <h3>${product.name}</h3>
-                        <p><strong>Référence:</strong> ${product.reference}</p>
+                        <h3>${product.name || 'Produit sans nom'}</h3>
+                        <p><strong>Référence:</strong> ${product.reference || 'N/A'}</p>
                         <p><strong>Expiration:</strong> ${formatDate(product.expiration)}</p>
                     </div>
                 `;
@@ -96,21 +115,72 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    function formatDate(dateString) {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('fr-FR');
+    function showProductInfo(product) {
+        if (product.rawData) {
+            showRawData(product.rawData, "Données du QR Code");
+            return;
+        }
+        
+        document.getElementById('infoProductName').textContent = product.name || 'Produit sans nom';
+        document.getElementById('infoReference').textContent = product.reference || 'N/A';
+        document.getElementById('infoProducer').textContent = product.producer || 'N/A';
+        document.getElementById('infoExpiration').textContent = formatDate(product.expiration);
+        document.getElementById('infoSteps').textContent = product.steps || 'Aucune étape spécifiée';
+        
+        const qrCodeElement = document.getElementById('scannedQrCode');
+        qrCodeElement.innerHTML = '';
+        
+        if (product.qrData) {
+            new QRCode(qrCodeElement, {
+                text: product.qrData,
+                width: 150,
+                height: 150,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+        
+        openModal(productInfoModal);
     }
     
-    // Modal functions
-    function openModal(modal) {
-        modal.style.display = 'flex';
+    function showRawData(data, title = "Contenu du QR Code") {
+        document.querySelector('#rawDataModal .modal-header h3').textContent = title;
+        document.getElementById('rawDataContent').textContent = data;
+        openModal(rawDataModal);
     }
     
-    function closeModal(modal) {
-        modal.style.display = 'none';
+    function generateQRCode(productData) {
+        const qrCodeElement = document.getElementById('generatedQrCode');
+        qrCodeElement.innerHTML = '';
+        
+        const productDetails = [
+            `Réf: ${productData.reference || ''}`,
+            `Prod: ${productData.producer || ''}`,
+            `Exp: ${productData.expiration || ''}`,
+            productData.steps ? `Étapes: ${productData.steps}` : ''
+        ].filter(Boolean).join(' • ');
+        
+        document.getElementById('qrProductName').textContent = productData.name || 'Produit sans nom';
+        document.getElementById('qrProductDetails').textContent = productDetails;
+        
+        const qrData = JSON.stringify(productData);
+        new QRCode(qrCodeElement, {
+            text: qrData,
+            width: 200,
+            height: 200,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+        
+        // Stocker les données pour la sauvegarde
+        qrCodeElement.dataset.qrData = qrData;
+        
+        openModal(qrModal);
     }
     
-    // Event listeners for tabs
+    // Écouteurs d'événements
     addTab.addEventListener('click', function() {
         switchTab(this);
     });
@@ -123,7 +193,6 @@ document.addEventListener('DOMContentLoaded', function() {
         switchTab(this);
     });
     
-    // Event listeners for modals
     addTab.addEventListener('click', function() {
         openModal(addModal);
     });
@@ -145,26 +214,29 @@ document.addEventListener('DOMContentLoaded', function() {
         closeModal(productInfoModal);
     });
     
+    closeRawDataModal.addEventListener('click', function() {
+        closeModal(rawDataModal);
+        startScanner();
+    });
+    
     closeInfoButton.addEventListener('click', function() {
         closeModal(productInfoModal);
     });
     
-    // Product form submission
+    closeRawDataButton.addEventListener('click', function() {
+        closeModal(rawDataModal);
+        startScanner();
+    });
+    
     productForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
-        const productName = document.getElementById('productName').value;
-        const productReference = document.getElementById('productReference').value;
-        const producer = document.getElementById('producer').value;
-        const expirationDate = document.getElementById('expirationDate').value;
-        const productSteps = document.getElementById('productSteps').value;
-        
         const productData = {
-            name: productName,
-            reference: productReference,
-            producer: producer,
-            expiration: expirationDate,
-            steps: productSteps,
+            name: document.getElementById('productName').value,
+            reference: document.getElementById('productReference').value,
+            producer: document.getElementById('producer').value,
+            expiration: document.getElementById('expirationDate').value,
+            steps: document.getElementById('productSteps').value,
             createdAt: new Date().toISOString()
         };
         
@@ -173,79 +245,33 @@ document.addEventListener('DOMContentLoaded', function() {
         closeModal(addModal);
     });
     
-    // Save QR Code button
     saveQrButton.addEventListener('click', function() {
-        const productName = document.getElementById('qrProductName').textContent;
-        const productDetails = document.getElementById('qrProductDetails').textContent;
+        const qrCodeElement = document.getElementById('generatedQrCode');
+        const qrData = qrCodeElement.dataset.qrData;
         
-        const detailsParts = productDetails.split(' • ');
-        const productData = {
-            name: productName,
-            reference: detailsParts[0].replace('Réf: ', ''),
-            producer: detailsParts[1].replace('Prod: ', ''),
-            expiration: detailsParts[2].replace('Exp: ', ''),
-            steps: detailsParts[3] ? detailsParts[3].replace('Étapes: ', '') : '',
-            createdAt: new Date().toISOString()
-        };
+        if (!qrData) {
+            alert('Aucune donnée QR à enregistrer');
+            return;
+        }
         
-        products.unshift(productData);
-        localStorage.setItem('products', JSON.stringify(products));
-        closeModal(qrModal);
-        switchTab(historyTab);
-        showHistory();
+        try {
+            const productData = JSON.parse(qrData);
+            products.unshift(productData);
+            localStorage.setItem('products', JSON.stringify(products));
+            closeModal(qrModal);
+            switchTab(historyTab);
+            showHistory();
+        } catch (e) {
+            console.error('Erreur enregistrement:', e);
+            alert('Erreur lors de l\'enregistrement');
+        }
     });
     
-    // Generate QR Code
-    function generateQRCode(productData) {
-        const qrCodeElement = document.getElementById('generatedQrCode');
-        qrCodeElement.innerHTML = '';
-        
-        const productDetails = `Réf: ${productData.reference} • Prod: ${productData.producer} • Exp: ${productData.expiration}${productData.steps ? ' • Étapes: ' + productData.steps : ''}`;
-        
-        document.getElementById('qrProductName').textContent = productData.name;
-        document.getElementById('qrProductDetails').textContent = productDetails;
-        
-        new QRCode(qrCodeElement, {
-            text: JSON.stringify(productData),
-            width: 200,
-            height: 200,
-            colorDark: "#000000",
-            colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.H
-        });
-        
-        openModal(qrModal);
-    }
-    
-    // Show product info
-    function showProductInfo(product) {
-        document.getElementById('infoProductName').textContent = product.name;
-        document.getElementById('infoReference').textContent = product.reference;
-        document.getElementById('infoProducer').textContent = product.producer;
-        document.getElementById('infoExpiration').textContent = formatDate(product.expiration);
-        document.getElementById('infoSteps').textContent = product.steps || 'Aucune étape spécifiée';
-        
-        const qrCodeElement = document.getElementById('scannedQrCode');
-        qrCodeElement.innerHTML = '';
-        
-        new QRCode(qrCodeElement, {
-            text: JSON.stringify(product),
-            width: 150,
-            height: 150,
-            colorDark: "#000000",
-            colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.H
-        });
-        
-        openModal(productInfoModal);
-    }
-    
-    // Initialize with welcome content
-    switchTab(addTab);
-    
-    // Scan tab opens scanner modal
     scanTab.addEventListener('click', function() {
         openModal(scanModal);
         startScanner();
     });
+    
+    // Initialisation
+    switchTab(addTab);
 });
