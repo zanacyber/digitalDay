@@ -1,4 +1,3 @@
-/* Styles supplémentaires */
 #generatedQrCode, #scannedQrCode {
     display: flex;
     justify-content: center;
@@ -52,32 +51,14 @@
     margin: 10px 0;
 }
 
-/* Styles pour le modal des données brutes */
-.raw-data-container {
-    background-color: #f8f8f8;
-    border-radius: 8px;
-    padding: 10px;
-    margin: 10px 0;
-    max-height: 200px;
-    overflow-y: auto;
+.modal {
+    display: none;
 }
 
-#rawDataContent {
-    white-space: pre-wrap;
-    word-break: break-word;
-    font-family: 'Courier New', monospace;
-    font-size: 14px;
-    line-height: 1.4;
-    margin: 0;
+.modal.active {
+    display: flex;
 }
 
-/* Amélioration du style iOS pour les modals */
-.ios-modal .info-section {
-    margin-bottom: 20px;
-}
-
-.ios-modal .info-section h4 {
-    color: #007aff;
-    font-size: 16px;
-    margin-bottom: 8px;
+body.modal-open {
+    overflow: hidden;
 }
